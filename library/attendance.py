@@ -1,5 +1,6 @@
 from db.db_connector import get_db_connection
 from datetime import datetime, time
+from tabulate import tabulate
 
 
 # Polymorphism for class ForenoonAttendance and class AfternoonAttendance
@@ -7,7 +8,7 @@ class ForenoonAttendance:
     @staticmethod
     def is_attendance_open(current_time):
         forenoon_start_time = time(8, 45)
-        forenoon_end_time = time(11, 59)
+        forenoon_end_time = time(9, 30)
         return forenoon_start_time <= current_time <= forenoon_end_time
 
     @staticmethod
@@ -19,7 +20,7 @@ class AfternoonAttendance:
     @staticmethod
     def is_attendance_open(current_time):
         afternoon_start_time = time(12, 30)
-        afternoon_end_time = time(17, 30)
+        afternoon_end_time = time(13, 30)
         return afternoon_start_time <= current_time <= afternoon_end_time
 
     @staticmethod
@@ -46,12 +47,30 @@ class Attendance:
         self.db_connection.commit()
         cursor.close()
 
+    def attendance_option(self, username):
+        while True:
+            print("Attendance")
+            choice = int(
+                input("1. Record your Attendance\n2. View Attendance History\n3. MainMenu\nEnter your choice: "))
+            if choice == 1:
+                print("Record Attendance")
+                self.record_attendance(username)
+            elif choice == 2:
+                print("View Attendance")
+                self.view_attendance(username)
+            elif choice == 3:
+                print("Getting Back to MainMenu")
+                break
+            else:
+                print("Invalid Choice. Try Again!")
+
     def record_attendance(self, username):
         cursor = self.db_connection.cursor()
         current_time = datetime.now().time()
 
         if not self.attendance_type:
-            self.attendance_type = ForenoonAttendance.get_attendance_type() if ForenoonAttendance.is_attendance_open(current_time) else AfternoonAttendance.get_attendance_type()
+            self.attendance_type = ForenoonAttendance.get_attendance_type() if ForenoonAttendance.is_attendance_open(
+                current_time) else AfternoonAttendance.get_attendance_type()
 
         query = """INSERT INTO attendance (username, attendance_date, attendance_time, attendance_type) 
                    VALUES (%s, %s, %s, %s)"""
@@ -61,3 +80,17 @@ class Attendance:
         print(f"Current time is {current_time}")
         print("Attendance recorded successfully.")
         cursor.close()
+
+    def view_attendance(self, username):
+        cursor = self.db_connection.cursor()
+        query = """SELECT attendance_date, attendance_time, attendance_type FROM attendance 
+                   WHERE username = %s"""
+        cursor.execute(query, (username,))
+        attendance_data = cursor.fetchall()
+
+        if attendance_data:
+            headers = ["Date", "Time", "Attendance Type"]
+            print("Attendance Records:")
+            print(tabulate(attendance_data, headers=headers, tablefmt="grid", colalign="center"))
+        else:
+            print("No attendance records found for the given username.")

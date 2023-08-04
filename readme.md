@@ -70,7 +70,7 @@ db_connection = mysql.connector.connect(
     )
 ```
 
-## Program Running Flow v1.0
+## Program Running Flow
 Step 1: User starts the application. <br>
 Step 2: Landing Page. <br>
 Step 3: User Choice: 1. Signin, 2. Signup, 3. Exit <br>
@@ -79,7 +79,16 @@ Step 5: The Created account details will be stored in MySQL Database. <br>
 Step 6: The user's login credentials will be listed only if they enter their passcode. <br>
 Step 7: The user can login and check his schedules for the day and mark his attendance.
 
+## v1.0
+1. User must create a account for using the functionalities.
+2. User can view their login credentials using their mobile number.
+3. User can sign in with his credentials generated for them.
+4. Sessions can be viewed.
+
 ## v2.0
 1. Sign out bug fixed.
 2. User Login sessions will be recorded.
-3. Attendance is added.
+3. Attendance marking is added.
+
+## v3.0
+1. View Attendance is added.

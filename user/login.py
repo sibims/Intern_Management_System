@@ -78,7 +78,7 @@ class Login:
                     session.view_schedule(intern.get_name())
                 elif choice == 2:
                     mark_attendance = Attendance()
-                    mark_attendance.record_attendance(username)
+                    mark_attendance.attendance_option(username)
                 elif choice == 3:
                     self.signout()
                     break
