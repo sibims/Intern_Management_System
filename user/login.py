@@ -1,5 +1,7 @@
 from db.db_connector import get_db_connection
 from library.session import ScheduleManager
+from library.attendance import Attendance
+
 import mysql.connector
 
 import pwinput
@@ -40,31 +42,44 @@ class Login:
         self.db_connection = None
         self.session_manager = None
         self.current_user = None
+        self.db_connection = get_db_connection()
+        cursor = self.db_connection.cursor()
+
+        # Login Table
+        query = """CREATE TABLE IF NOT EXISTS login (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    username VARCHAR(15) NOT NULL,
+                    login_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )"""
+        cursor.execute(query)
+        self.db_connection.commit()
+        cursor.close()
 
     # Login
     def login(self):
-        if self.current_user:
-            choice = input("You are already logged in. Do you want to sign out? (yes/no): ").lower()
-            if choice == "yes":
-                self.signout()
-                return None
-            elif choice == "no":
-                print("Continuing with the current login session.")
-            else:
-                print("Invalid choice. Continuing with the current login session.")
-
         username = input("Enter your username: ")
         password = pwinput.pwinput(prompt='Enter your Password: ', mask='*')
 
         intern = self.authenticate_user(username, password)
         if intern:
             print("Authentication successful. Welcome,", intern.get_name())
+            self.db_connection = get_db_connection()
+            cursor = self.db_connection.cursor()
+            query = """INSERT INTO login (username, login_timestamp) VALUES (%s, %s)"""
+            data = (username, datetime.now())
+            cursor.execute(query, data)
+            self.db_connection.commit()
+            cursor.close()
+            self.current_user = True
             while True:
-                choice = int(input("1. View All Sessions\n2. Sign Out\n Enter your choice: "))
+                choice = int(input("1. View All Sessions\n2. Mark your Attendance\n3. Sign Out\n Enter your choice: "))
                 if choice == 1:
                     session = ScheduleManager()
                     session.view_schedule(intern.get_name())
                 elif choice == 2:
+                    mark_attendance = Attendance()
+                    mark_attendance.record_attendance(username)
+                elif choice == 3:
                     self.signout()
                     break
                 else:
@@ -80,7 +95,7 @@ class Login:
             if choice == 1:
                 Login.login(self)
             elif choice == 2:
-                View_Details.details()
+                View_Details.details(self)
             elif choice == 3:
                 print("Returning to Home Screen")
                 break
@@ -124,13 +139,8 @@ class Login:
 
     # Sign-out
     def signout(self):
-        if self.current_user:
-            session_id = self.session_manager.get_session_id_by_username(self.current_user.get_username())
-            self.session_manager.remove_session(session_id)
-            self.current_user = None
-            print("Sign-out successful. You have been logged out.")
-        else:
-            print("You are not logged in.")
+        self.current_user = None
+        print("Sign-out successful. You have been logged out.")
 
 
 class SignUp:
@@ -213,7 +223,7 @@ class SignUp:
         print("Account created successfully!")
         return
 
-
+# Inherited Class View_Details from Login
 class View_Details(Login):
     def details(self):
         while True:
@@ -232,12 +242,12 @@ class View_Details(Login):
             db_connection = get_db_connection()
             cursor = db_connection.cursor()
 
-            query = """SELECT id, first_name, last_name, mobile_number, blood_group, created_at FROM users WHERE mobile_number = %s AND passcode = %s"""
+            query = """SELECT id, first_name, last_name, username, password FROM users WHERE mobile_number = %s AND passcode = %s"""
             cursor.execute(query, (mobile_number, passcode))
             intern_data = cursor.fetchone()
 
             if intern_data:
-                headers = ["ID", "First Name", "Last Name", "Mobile Number", "Blood Group", "Created At"]
+                headers = ["ID", "First Name", "Last Name", "Username", "Password"]
                 data = [intern_data]
 
                 print("Intern Details:")

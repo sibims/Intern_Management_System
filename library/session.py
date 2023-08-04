@@ -8,14 +8,14 @@ class ScheduleManager:
     def __init__(self):
         self.db_connection = get_db_connection()
 
-    def view_schedule(self):
+    def view_schedule(self, intern):
         cursor = self.db_connection.cursor()
 
         query = """SELECT session_id, session_title, handled_by, time, duration FROM schedules"""
 
         cursor.execute(query)
         sessions = cursor.fetchall()
-
+        print(f"The sessions for {intern}")
         if sessions:
             headers = ["Session ID", "Title", "Handled By", "Time", "Duration"]
             print(tabulate(sessions, headers=headers, tablefmt="grid"))
