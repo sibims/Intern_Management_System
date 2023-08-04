@@ -10,6 +10,7 @@ from datetime import datetime
 from tabulate import tabulate
 
 
+# Object for Signed in User
 class Intern:
     def __init__(self, id, first_name, last_name, mobile_number, blood_group, created_at, username, password):
         self.id = id
@@ -38,6 +39,8 @@ class Intern:
 
 
 class Login:
+
+    # Default Constructor
     def __init__(self):
         self.db_connection = None
         self.session_manager = None
@@ -186,7 +189,7 @@ class SignUp:
 
         # Passcode Validation
         while True:
-            passcode = input("Enter the your passcode to view details: ")
+            passcode = pwinput.pwinput(prompt='Enter a 4 digit passcode: ', mask='*')
             if not re.match(r'^\d{4}$', passcode):
                 print("Invalid passcode format. Please enter a 4-digit passcode.")
             else:
@@ -233,7 +236,7 @@ class View_Details(Login):
             else:
                 break
         while True:
-            passcode = input("Enter the your passcode to view details: ")
+            passcode = pwinput.pwinput(prompt='Enter your Passcode to view details: ', mask='*')
             if not re.match(r'^\d{4}$', passcode):
                 print("Invalid passcode format. Please enter a 4-digit passcode.")
             else:

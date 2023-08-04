@@ -91,6 +91,6 @@ class Attendance:
         if attendance_data:
             headers = ["Date", "Time", "Attendance Type"]
             print("Attendance Records:")
-            print(tabulate(attendance_data, headers=headers, tablefmt="grid", colalign="center"))
+            print(tabulate(attendance_data, headers=headers, tablefmt="grid", colalign=("left","left","center")))
         else:
             print("No attendance records found for the given username.")
