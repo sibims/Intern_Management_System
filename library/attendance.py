@@ -19,8 +19,8 @@ class ForenoonAttendance:
 class AfternoonAttendance:
     @staticmethod
     def is_attendance_open(current_time):
-        afternoon_start_time = time(12, 30)
-        afternoon_end_time = time(13, 30)
+        afternoon_start_time = time(12, 30, 00)
+        afternoon_end_time = time(13, 30, 00)
         return afternoon_start_time <= current_time <= afternoon_end_time
 
     @staticmethod
@@ -72,13 +72,23 @@ class Attendance:
             self.attendance_type = ForenoonAttendance.get_attendance_type() if ForenoonAttendance.is_attendance_open(
                 current_time) else AfternoonAttendance.get_attendance_type()
 
-        query = """INSERT INTO attendance (username, attendance_date, attendance_time, attendance_type) 
-                   VALUES (%s, %s, %s, %s)"""
-        data = (username, datetime.now().date(), current_time, self.attendance_type)
-        cursor.execute(query, data)
-        self.db_connection.commit()
-        print(f"Current time is {current_time}")
-        print("Attendance recorded successfully.")
+        allowed_to_record = False
+
+        if self.attendance_type == ForenoonAttendance.get_attendance_type():
+            allowed_to_record = ForenoonAttendance.is_attendance_open(current_time)
+        elif self.attendance_type == AfternoonAttendance.get_attendance_type():
+            allowed_to_record = AfternoonAttendance.is_attendance_open(current_time)
+
+        if allowed_to_record:
+            query = """INSERT INTO attendance (username, attendance_date, attendance_time, attendance_type) 
+                               VALUES (%s, %s, %s, %s)"""
+            data = (username, datetime.now().date(), current_time, self.attendance_type)
+            cursor.execute(query, data)
+            self.db_connection.commit()
+            print(f"Current time is {current_time.strftime('%H:%M:%S')}")
+            print("Attendance recorded successfully.")
+        else:
+            print("Attendance is not opened.")
         cursor.close()
 
     def view_attendance(self, username):
@@ -91,6 +101,6 @@ class Attendance:
         if attendance_data:
             headers = ["Date", "Time", "Attendance Type"]
             print("Attendance Records:")
-            print(tabulate(attendance_data, headers=headers, tablefmt="grid", colalign=("left","left","center")))
+            print(tabulate(attendance_data, headers=headers, tablefmt="grid", colalign=("left", "left", "center")))
         else:
             print("No attendance records found for the given username.")

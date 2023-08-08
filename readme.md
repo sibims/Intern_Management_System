@@ -92,3 +92,8 @@ Step 7: The user can login and check his schedules for the day and mark his atte
 
 ## v3.0
 1. View Attendance is added.
+
+## v4.0
+1. View Up-Coming Sessions Added.
+2. Program sleep have been implemented.
+3. Status of all sessions will be listed.

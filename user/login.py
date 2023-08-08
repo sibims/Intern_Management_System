@@ -1,8 +1,9 @@
 from db.db_connector import get_db_connection
-from library.session import ScheduleManager
+from library.session import SessionLander
 from library.attendance import Attendance
 
 import mysql.connector
+import time
 
 import pwinput
 import re
@@ -64,8 +65,9 @@ class Login:
         password = pwinput.pwinput(prompt='Enter your Password: ', mask='*')
 
         intern = self.authenticate_user(username, password)
+        time.sleep(1)
         if intern:
-            print("Authentication successful. Welcome,", intern.get_name())
+            print("\nAuthentication successful. Welcome,", intern.get_name())
             self.db_connection = get_db_connection()
             cursor = self.db_connection.cursor()
             query = """INSERT INTO login (username, login_timestamp) VALUES (%s, %s)"""
@@ -75,10 +77,11 @@ class Login:
             cursor.close()
             self.current_user = True
             while True:
-                choice = int(input("1. View All Sessions\n2. Mark your Attendance\n3. Sign Out\n Enter your choice: "))
+                time.sleep(1)
+                choice = int(input("1. View Sessions\n2. Mark your Attendance\n3. Sign Out\n Enter your choice: "))
                 if choice == 1:
-                    session = ScheduleManager()
-                    session.view_schedule(intern.get_name())
+                    session = SessionLander()
+                    session.home(intern.get_name())
                 elif choice == 2:
                     mark_attendance = Attendance()
                     mark_attendance.attendance_option(username)
@@ -89,6 +92,7 @@ class Login:
                     print("Invalid Choice. Try Again.")
         else:
             print("Authentication failed. Invalid username or password.")
+            time.sleep(1)
             return None
 
     # Sign In User Landing Page
@@ -96,11 +100,14 @@ class Login:
         while True:
             choice = int(input("1. Login\n2. View Details\n3. Landing Page\nEnter your choice: "))
             if choice == 1:
+                time.sleep(1)
                 Login.login(self)
             elif choice == 2:
+                time.sleep(1)
                 View_Details.details(self)
             elif choice == 3:
                 print("Returning to Home Screen")
+                time.sleep(1)
                 break
             else:
                 print("Invalid Choice. Try Again!")
@@ -138,12 +145,14 @@ class Login:
 
         except mysql.connector.Error as e:
             print(f"Error occurred during database operation: {e}")
+            time.sleep(1)
             return None
 
     # Sign-out
     def signout(self):
         self.current_user = None
         print("Sign-out successful. You have been logged out.")
+        time.sleep(1)
 
 
 class SignUp:
@@ -223,6 +232,7 @@ class SignUp:
         except mysql.connector.Error as e:
             print(f"Error occurred: {e}")
 
+        time.sleep(1)
         print("Account created successfully!")
         return
 
